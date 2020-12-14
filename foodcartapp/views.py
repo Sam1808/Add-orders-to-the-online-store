@@ -1,6 +1,8 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
+from rest_framework import status
+from rest_framework.response import Response
 
 from .models import Product, CustomerOrder, OrderDetails
 
@@ -56,10 +58,19 @@ def product_list_api(request):
         'indent': 4,
     })
 
+
 @api_view(['POST'])
 def register_order(request):
     order_data = request.data
-    print(order_data)  #TODO: delete string
+    print(order_data)  # delete string
+
+    try:
+        products = order_data['products']
+    except KeyError:
+        return Response("There is no 'products'", status=status.HTTP_400_BAD_REQUEST)
+
+    if not isinstance(products, list) or len(products)==0:
+        return Response(f"{order_data['products']} is not list or null", status=status.HTTP_400_BAD_REQUEST)
 
     order = CustomerOrder.objects.create(
         firstname=order_data['firstname'],
