@@ -117,13 +117,13 @@ class CustomerOrderAdmin(admin.ModelAdmin):
     list_display = [
         'firstname',
         'lastname',
-        'phone',
+        'phonenumber',
         'address',
     ]
     list_display_links = [
         'firstname',
         'lastname',
-        'phone',
+        'phonenumber',
         'address',
     ]
 

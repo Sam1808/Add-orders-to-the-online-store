@@ -1,10 +1,29 @@
 from django.http import JsonResponse
 from django.templatetags.static import static
 from rest_framework.decorators import api_view
-from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.serializers import ModelSerializer, ValidationError
 
 from .models import Product, CustomerOrder, OrderDetails
+
+
+class OrderDetailsSerializer(ModelSerializer):
+    class Meta:
+        model = OrderDetails
+        fields = ['product', 'quantity']
+
+
+class CustomerOrderSerializer(ModelSerializer):
+    products = OrderDetailsSerializer(many=True, write_only=True)
+
+    def validate_products(self, value):
+        if len(value) == 0:
+            raise ValidationError('List is empty')
+        return value
+
+    class Meta:
+        model = CustomerOrder
+        fields = ['id', 'products', 'firstname', 'lastname', 'phonenumber', 'address']
 
 
 def banners_list_api(request):
@@ -61,41 +80,25 @@ def product_list_api(request):
 
 @api_view(['POST'])
 def register_order(request):
-    order_data = request.data
-    print(order_data)  # TODO delete string
 
-    try:
-        products = order_data['products']
-        firstname = order_data['firstname']
-        lastname = order_data['lastname']
-        phone = order_data['phonenumber']
-        address = order_data['address']
-    except KeyError:
-        return Response("Not enough data", status=status.HTTP_400_BAD_REQUEST)
+    serializer = CustomerOrderSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
 
-    for value in order_data.values():
-        if value is None or len(value) == 0:
-            return Response("Some data was lost", status=status.HTTP_400_BAD_REQUEST)
-
-    if not isinstance(products, list) or not isinstance(firstname, str):
-        return Response("Wrong data type", status=status.HTTP_400_BAD_REQUEST)
-
-    order = CustomerOrder.objects.create(  # TODO: move order creation
-        firstname=firstname,
-        lastname=lastname,
-        phone=phone,
-        address=address,
+    order = CustomerOrder.objects.create(
+        firstname=serializer.validated_data['firstname'],
+        lastname=serializer.validated_data['lastname'],
+        phonenumber=serializer.validated_data['phonenumber'],
+        address=serializer.validated_data['address'],
     )
 
-    for product in order_data['products']:
-        selected_product = product['product']
-        if not isinstance(selected_product, int):
-            return Response("Wrong product data type", status=status.HTTP_400_BAD_REQUEST)
+    for each_product in serializer.validated_data['products']:
         order_details = OrderDetails.objects.create(
-            quantity=product['quantity']
+            quantity=each_product['quantity']
         )        
-        order_details.product_id = selected_product
+        order_details.product_id = each_product['product']
         order_details.customer_id = order.id
         order_details.save()
 
-    return JsonResponse({})
+    order_content = CustomerOrderSerializer(order)
+
+    return Response(order_content.data)

@@ -69,8 +69,8 @@ class RestaurantMenuItem(models.Model):
 class CustomerOrder(models.Model):
     firstname = models.CharField('имя', max_length=30)
     lastname = models.CharField('фамилия', max_length=30)
-    phone = models.CharField('телефон', max_length=30)
-    address = models.CharField('адрес', max_length=30)
+    phonenumber = models.CharField('телефон', max_length=30)
+    address = models.CharField('адрес', max_length=100)
 
     def __str__(self):
         return f"{self.firstname} {self.lastname} {self.address}"
@@ -82,7 +82,7 @@ class CustomerOrder(models.Model):
 
 class OrderDetails(models.Model):
     product = models.ForeignKey(Product, null=True, on_delete=models.CASCADE, related_name='order_items', verbose_name='бургер')
-    quantity = models.PositiveIntegerField('количество', default=0)
+    quantity = models.PositiveIntegerField('количество')
     customer = models.ForeignKey(CustomerOrder, null=True, on_delete=models.CASCADE, related_name='customer_items')
 
     class Meta:
