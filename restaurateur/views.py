@@ -7,8 +7,9 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib.auth import authenticate, login
 from django.contrib.auth import views as auth_views
 
+from django.db.models import Sum
 
-from foodcartapp.models import Product, Restaurant
+from foodcartapp.models import CustomerOrder
 
 
 class Login(forms.Form):
@@ -97,6 +98,7 @@ def view_restaurants(request):
 
 @user_passes_test(is_manager, login_url='restaurateur:login')
 def view_orders(request):
-    return render(request, template_name='order_items.html', context={
-        # TODO заглушка для нереализованного функционала
-    })
+
+    all_orders = CustomerOrder.objects.annotate(total_order_price=Sum('customer_items__total_price')).order_by('-id')
+
+    return render(request, template_name='order_items.html', context={'order_items':all_orders})

@@ -3,6 +3,7 @@ from django.templatetags.static import static
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.serializers import ModelSerializer, ValidationError
+from django.db import transaction
 
 from .models import Product, CustomerOrder, OrderDetails
 
@@ -77,7 +78,7 @@ def product_list_api(request):
         'indent': 4,
     })
 
-
+@transaction.atomic
 @api_view(['POST'])
 def register_order(request):
 
@@ -97,6 +98,7 @@ def register_order(request):
         )        
         order_details.product_id = each_product['product']
         order_details.customer_id = order.id
+        order_details.total_price = order_details.get_total_price()
         order_details.save()
 
     order_content = CustomerOrderSerializer(order)

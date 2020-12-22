@@ -84,6 +84,10 @@ class OrderDetails(models.Model):
     product = models.ForeignKey(Product, null=True, on_delete=models.CASCADE, related_name='order_items', verbose_name='бургер')
     quantity = models.PositiveIntegerField('количество')
     customer = models.ForeignKey(CustomerOrder, null=True, on_delete=models.CASCADE, related_name='customer_items')
+    total_price = models.DecimalField('Итого цена', max_digits=8, decimal_places=2, default=0)
+
+    def get_total_price(self):
+        return (self.quantity * self.product_id.price)
 
     class Meta:
         verbose_name_plural = 'детали заказа'
