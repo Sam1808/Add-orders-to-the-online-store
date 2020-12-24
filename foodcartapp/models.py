@@ -67,10 +67,28 @@ class RestaurantMenuItem(models.Model):
 
 
 class CustomerOrder(models.Model):
+    STATUSES = [
+        ('NEW_ORDER', 'Необработанный'),
+        ('IN_PROGRESS', 'В работе'),
+        ('DELEVERY', 'Доставка'),
+        ('COMPLETE', 'Выполнен'),
+    ]
+
+    PAYMENT_TYPE = [
+        ('ON_LINE', 'Электронно'),
+        ('CASH', 'Наличными'),
+    ]
+
     firstname = models.CharField('имя', max_length=30)
     lastname = models.CharField('фамилия', max_length=30)
     phonenumber = models.CharField('телефон', max_length=30)
     address = models.CharField('адрес', max_length=100)
+    order_status = models.CharField('статус', max_length=15, choices=STATUSES, default=STATUSES[0][0])
+    comment = models.TextField('комментарий', max_length=200, blank=True)
+    registrated_datetime = models.DateTimeField('зарегистрирован', auto_now_add=True, null=True)
+    called_datetime = models.DateTimeField('в обработке', null=True, blank=True)
+    delivered_datetime = models.DateTimeField('доставлен', null=True, blank=True)
+    payment_type = models.CharField('способ оплаты', max_length=10, choices=PAYMENT_TYPE, default=PAYMENT_TYPE[0][0])
 
     def __str__(self):
         return f"{self.firstname} {self.lastname} {self.address}"

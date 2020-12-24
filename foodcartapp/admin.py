@@ -121,6 +121,8 @@ class CustomerOrderAdmin(admin.ModelAdmin):
         'lastname',
         'phonenumber',
         'address',
+        'order_status',
+        'registrated_datetime',
     ]
     list_display_links = [
         'firstname',
@@ -132,6 +134,32 @@ class CustomerOrderAdmin(admin.ModelAdmin):
     inlines = [
         OrderDetailsInline
     ]
+
+    fieldsets = (
+        ('Заказчик', {
+            'fields': [
+                'firstname',
+                'lastname',
+                'phonenumber',
+                'address',
+            ]
+        }),
+        ('Описание заказа', {
+            'fields': [
+                'order_status',
+                'payment_type',
+                'comment',
+                'registrated_datetime',
+                'called_datetime',
+                'delivered_datetime',
+            ],
+        }),
+    )
+
+    readonly_fields = ['registrated_datetime']
+
+    def field2(self, obj):  # to show non-editable order datatime info
+        return '*** CLASSIFIED *** {}'.format(obj.registrated_datetime)
 
     def response_post_save_change(self, request, obj):
         res = super().response_post_save_change(request, obj)

@@ -9,7 +9,7 @@ from django.contrib.auth import views as auth_views
 
 from django.db.models import Sum
 
-from foodcartapp.models import CustomerOrder
+from foodcartapp.models import CustomerOrder, RestaurantMenuItem
 
 
 class Login(forms.Form):
@@ -100,5 +100,29 @@ def view_restaurants(request):
 def view_orders(request):
 
     all_orders = CustomerOrder.objects.annotate(total_order_price=Sum('customer_items__total_price')).order_by('-id')
+    all_restaurant_menu_item = RestaurantMenuItem.objects.all()
 
-    return render(request, template_name='order_items.html', context={'order_items':all_orders})
+    orders_and_existence = {}
+
+    for order in all_orders:
+        existence_list = []
+
+        for item in order.customer_items.all():
+
+            product_places = all_restaurant_menu_item.filter(product__id=item.product.id)
+            all_existense = []
+            for product in product_places:
+                if product.availability:
+                    existense = product.restaurant.name
+                    all_existense.append(existense)
+
+            if len(existence_list) == 0:
+                existence_list = all_existense.copy()
+                continue
+            # to fetch unique restaurant
+            existence_list = set(existence_list) & set(all_existense)
+
+        orders_and_existence[order.id] = existence_list
+
+    print (orders_and_existence)
+    return render(request, template_name='order_items.html', context={'order_items': all_orders, 'orders_and_existence': orders_and_existence})
