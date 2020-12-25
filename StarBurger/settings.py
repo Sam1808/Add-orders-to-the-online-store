@@ -100,6 +100,14 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.db.DatabaseCache',
+        'LOCATION': 'my_cache_table',
+    }
+}
+
+
 LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
