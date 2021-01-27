@@ -46,7 +46,7 @@
 
 Скачайте код:
 ```sh
-git clone https://github.com/devmanorg/star-burger.git
+git clone https://github.com/Sam1808/Add-orders-to-the-online-store.git
 ```
 
 [Установите Python](https://www.python.org/), если этого ещё не сделали.
